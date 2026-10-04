@@ -14,18 +14,17 @@ import UserProfileModal from './components/UserProfileModal';
 import TheatreDetailModal from './components/TheatreDetailModal';
 import { Film, Sparkles, Building2, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 
-const API_BASE = ''; // Same host
+const API_BASE = '';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('MOVIES'); // MOVIES | THEATRES
+  const [activeTab, setActiveTab] = useState('MOVIES');
   const [movies, setMovies] = useState([]);
   const [theatres, setTheatres] = useState([]);
   const [totalMatches, setTotalMatches] = useState(0);
   const [filterOptions, setFilterOptions] = useState({});
   const [recommendations, setRecommendations] = useState({});
   const [moviesLoading, setMoviesLoading] = useState(true);
-  
-  // Filter States
+
   const [selectedCity, setSelectedCity] = useState('Madurai');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -40,10 +39,7 @@ export default function App() {
     sort_by: 'popularity'
   });
 
-  // User Auth state
   const [user, setUser] = useState(null);
-
-  // Modals state
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [selectedTheatre, setSelectedTheatre] = useState(null);
   const [seatMapMovie, setSeatMapMovie] = useState(null);
@@ -53,7 +49,6 @@ export default function App() {
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-  // Debounce search term
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(searchTerm), 400);
     return () => clearTimeout(t);
@@ -73,13 +68,8 @@ export default function App() {
       .catch(err => console.error(err));
   }, []);
 
-  useEffect(() => {
-    fetchMovies();
-  }, [selectedCity, debouncedSearch, filters, page]);
-
-  useEffect(() => {
-    fetchTheatres();
-  }, [selectedCity]);
+  useEffect(() => { fetchMovies(); }, [selectedCity, debouncedSearch, filters, page]);
+  useEffect(() => { fetchTheatres(); }, [selectedCity]);
 
   const fetchMovies = () => {
     setMoviesLoading(true);
@@ -112,15 +102,7 @@ export default function App() {
   };
 
   const handleResetFilters = () => {
-    setFilters({
-      genre: '',
-      language: '',
-      theater: '',
-      rating: '',
-      timing: '',
-      format: '',
-      sort_by: 'popularity'
-    });
+    setFilters({ genre: '', language: '', theater: '', rating: '', timing: '', format: '', sort_by: 'popularity' });
     setSearchTerm('');
     setPage(1);
   };
@@ -132,9 +114,9 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-dark)' }}>
-      
-      {/* Navbar */}
-      <Navbar 
+
+      {/* ── Navbar ── */}
+      <Navbar
         selectedCity={selectedCity}
         setSelectedCity={setSelectedCity}
         cities={filterOptions.cities || []}
@@ -147,59 +129,55 @@ export default function App() {
         onOpenAdmin={() => setShowAdminModal(true)}
       />
 
-      {/* Primary Category Switch Bar */}
-      <div style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)', padding: '10px 0' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px', display: 'flex', gap: '20px' }}>
-          <button 
+      {/* ── Tab Bar ── */}
+      <div className="tab-bar">
+        <div className="tab-bar-inner">
+          <button
             className={`btn ${activeTab === 'MOVIES' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setActiveTab('MOVIES')}
             style={{ padding: '8px 20px', fontSize: '0.9rem' }}
           >
-            <Film size={16} /> Movies in {selectedCity}
+            <Film size={16} /> Movies in {selectedCity || 'All Cities'}
           </button>
-          <button 
+          <button
             className={`btn ${activeTab === 'THEATRES' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setActiveTab('THEATRES')}
             style={{ padding: '8px 20px', fontSize: '0.9rem' }}
           >
-            <Building2 size={16} /> Theatres in {selectedCity}
+            <Building2 size={16} /> Theatres in {selectedCity || 'All Cities'}
           </button>
         </div>
       </div>
 
-      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px 60px 24px' }}>
-        
-        {/* Featured Hero Banner */}
-        <HeroBanner 
+      {/* ── Main Content ── */}
+      <main className="page-container" style={{ paddingBottom: '60px' }}>
+
+        {/* Hero Banner */}
+        <HeroBanner
           movies={recommendations.trending || movies}
           onSelectMovie={(movie) => setSelectedMovie(movie)}
         />
 
-        {/* Recommended for You Section */}
+        {/* Recommended Section */}
         {recommendations.recommended && recommendations.recommended.length > 0 && (
-          <section style={{ margin: '30px 0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-              <Sparkles size={24} color="#FFD700" />
-              <h2 style={{ fontSize: '1.6rem', color: 'white' }}>Recommended for You in {selectedCity}</h2>
+          <section style={{ margin: '28px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+              <Sparkles size={22} color="#FFD700" />
+              <h2 style={{ color: 'white' }}>Recommended for You</h2>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '24px' }}>
-              {recommendations.recommended.slice(0, 4).map(movie => (
-                <MovieCard 
-                  key={movie.id} 
-                  movie={movie} 
-                  onSelectMovie={(m) => setSelectedMovie(m)} 
-                />
+            <div className="recommended-grid movie-grid">
+              {recommendations.recommended.slice(0, 6).map(movie => (
+                <MovieCard key={movie.id} movie={movie} onSelectMovie={(m) => setSelectedMovie(m)} />
               ))}
             </div>
           </section>
         )}
 
-        {/* Main Content Area */}
+        {/* ── Movies Tab ── */}
         {activeTab === 'MOVIES' ? (
-          <div style={{ display: 'flex', gap: '32px', marginTop: '30px' }}>
-            
-            {/* Filter Sidebar */}
-            <FilterSidebar 
+          <div className="movie-discovery-row" style={{ display: 'flex', gap: '28px', marginTop: '24px' }}>
+
+            <FilterSidebar
               filters={filters}
               setFilters={setFilters}
               filterOptions={filterOptions}
@@ -207,22 +185,22 @@ export default function App() {
               onReset={handleResetFilters}
             />
 
-            {/* Movie Grid */}
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '1.6rem', color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Film size={22} color="var(--primary-red)" /> Now Showing Movies in {selectedCity}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+                <h2 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Film size={20} color="var(--primary-red)" /> Now Showing
                 </h2>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{totalMatches} movies found</span>
               </div>
 
               {moviesLoading ? (
                 <div className="movie-grid">
                   {Array.from({ length: 8 }).map((_, i) => (
                     <div key={i} style={{ background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', animation: 'pulse 1.5s infinite' }}>
-                      <div style={{ height: '320px', background: 'rgba(255,255,255,0.05)' }} />
-                      <div style={{ padding: '16px' }}>
-                        <div style={{ height: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', marginBottom: '8px', width: '70%' }} />
-                        <div style={{ height: '12px', background: 'rgba(255,255,255,0.04)', borderRadius: '6px', width: '50%' }} />
+                      <div style={{ height: '280px', background: 'rgba(255,255,255,0.05)' }} />
+                      <div style={{ padding: '14px' }}>
+                        <div style={{ height: '14px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', marginBottom: '8px', width: '70%' }} />
+                        <div style={{ height: '11px', background: 'rgba(255,255,255,0.04)', borderRadius: '6px', width: '50%' }} />
                       </div>
                     </div>
                   ))}
@@ -230,78 +208,59 @@ export default function App() {
               ) : movies.length > 0 ? (
                 <div className="movie-grid">
                   {movies.map(movie => (
-                    <MovieCard 
-                      key={movie.id}
-                      movie={movie}
-                      onSelectMovie={(m) => setSelectedMovie(m)}
-                    />
+                    <MovieCard key={movie.id} movie={movie} onSelectMovie={(m) => setSelectedMovie(m)} />
                   ))}
                 </div>
               ) : (
-                <div className="glass-panel" style={{ padding: '60px', textAlign: 'center', borderRadius: 'var(--radius-lg)' }}>
-                  <Film size={48} color="var(--text-muted)" style={{ marginBottom: '16px' }} />
-                  <h3 style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>No matching movies found in {selectedCity}</h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Try adjusting your filter criteria or selecting another city.</p>
-                  <button className="btn btn-outline" onClick={handleResetFilters} style={{ marginTop: '16px' }}>Reset All Filters</button>
+                <div className="glass-panel" style={{ padding: '48px 24px', textAlign: 'center', borderRadius: 'var(--radius-lg)' }}>
+                  <Film size={44} color="var(--text-muted)" style={{ margin: '0 auto 16px' }} />
+                  <h3 style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>No matching movies found</h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Try adjusting your filters or selecting another city.</p>
+                  <button className="btn btn-outline" onClick={handleResetFilters} style={{ marginTop: '16px' }}>Reset Filters</button>
                 </div>
               )}
 
-              {/* Pagination Controls */}
+              {/* Pagination */}
               {totalMatches > 12 && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginTop: '40px' }}>
-                  <button 
-                    className="btn btn-secondary"
-                    disabled={page === 1}
-                    onClick={() => setPage(p => Math.max(p - 1, 1))}
-                  >
-                    <ChevronLeft size={18} /> Previous
+                <div className="pagination-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '36px' }}>
+                  <button className="btn btn-secondary" disabled={page === 1} onClick={() => setPage(p => Math.max(p - 1, 1))}>
+                    <ChevronLeft size={18} /> Prev
                   </button>
                   <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 600 }}>
                     Page {page} of {Math.ceil(totalMatches / 12)}
                   </span>
-                  <button 
-                    className="btn btn-secondary"
-                    disabled={page >= Math.ceil(totalMatches / 12)}
-                    onClick={() => setPage(p => p + 1)}
-                  >
+                  <button className="btn btn-secondary" disabled={page >= Math.ceil(totalMatches / 12)} onClick={() => setPage(p => p + 1)}>
                     Next <ChevronRight size={18} />
                   </button>
                 </div>
               )}
             </div>
-
           </div>
-        ) : (
-          /* Theatres Grid */
-          <div style={{ marginTop: '30px' }}>
-            <h2 style={{ fontSize: '1.6rem', color: 'white', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Building2 size={24} color="var(--accent-cyan)" /> Cinema Theatres in {selectedCity}
-            </h2>
 
+        ) : (
+          /* ── Theatres Tab ── */
+          <div style={{ marginTop: '24px' }}>
+            <h2 style={{ color: 'white', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Building2 size={22} color="var(--accent-cyan)" /> Cinema Theatres in {selectedCity || 'All Cities'}
+            </h2>
             {theatres.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+              <div className="theatre-grid">
                 {theatres.map(t => (
-                  <div 
-                    key={t.id} 
-                    className="glass-panel"
-                    onClick={() => setSelectedTheatre(t)}
-                    style={{ padding: '24px', borderRadius: 'var(--radius-lg)', cursor: 'pointer', transition: 'var(--transition)' }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
-                      <Building2 size={24} color="var(--primary-red)" />
-                      <h3 style={{ fontSize: '1.3rem', color: 'white' }}>{t.name}</h3>
+                  <div key={t.id} className="glass-panel" onClick={() => setSelectedTheatre(t)}
+                    style={{ padding: '20px', borderRadius: 'var(--radius-lg)', cursor: 'pointer', transition: 'var(--transition)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                      <Building2 size={22} color="var(--primary-red)" />
+                      <h3 style={{ fontSize: '1.15rem', color: 'white' }}>{t.name}</h3>
                     </div>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
-                      <MapPin size={14} color="var(--accent-cyan)" /> {t.address}
+                      <MapPin size={13} color="var(--accent-cyan)" /> {t.address}
                     </p>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                       {t.facilities?.map((f, idx) => (
                         <span key={idx} style={{ fontSize: '0.72rem', background: 'rgba(255,255,255,0.06)', padding: '2px 8px', borderRadius: '4px', color: 'var(--text-muted)' }}>{f}</span>
                       ))}
                     </div>
-                    <button className="btn btn-outline" style={{ width: '100%', padding: '8px' }}>
-                      View Available Showtimes
-                    </button>
+                    <button className="btn btn-outline" style={{ width: '100%', padding: '8px' }}>View Showtimes</button>
                   </div>
                 ))}
               </div>
@@ -315,63 +274,56 @@ export default function App() {
 
       </main>
 
-      {/* Modals Container */}
+      {/* ── Modals ── */}
       {selectedMovie && (
-        <MovieDetailsModal 
+        <MovieDetailsModal
           movie={selectedMovie}
           onClose={() => setSelectedMovie(null)}
           onProceedToBook={(movie) => { setSelectedMovie(null); setSeatMapMovie(movie); }}
           user={user}
         />
       )}
-
       {selectedTheatre && (
-        <TheatreDetailModal 
+        <TheatreDetailModal
           theatre={selectedTheatre}
           onClose={() => setSelectedTheatre(null)}
-          onSelectShowtime={(movie, showtime) => { setSelectedTheatre(null); setSeatMapMovie(movie); }}
+          onSelectShowtime={(movie) => { setSelectedTheatre(null); setSeatMapMovie(movie); }}
         />
       )}
-
       {seatMapMovie && (
-        <SeatMapModal 
+        <SeatMapModal
           movie={seatMapMovie}
           onClose={() => setSeatMapMovie(null)}
           onProceedToPayment={(details) => { setSeatMapMovie(null); setBookingDetails(details); }}
           user={user}
         />
       )}
-
       {bookingDetails && (
-        <PaymentModal 
+        <PaymentModal
           bookingDetails={bookingDetails}
           onClose={() => setBookingDetails(null)}
           onBookingSuccess={(booking) => { setBookingDetails(null); setConfirmedBooking(booking); }}
         />
       )}
-
       {confirmedBooking && (
-        <ETicketModal 
+        <ETicketModal
           booking={confirmedBooking}
           onClose={() => setConfirmedBooking(null)}
         />
       )}
-
       {showAuthModal && (
-        <AuthModal 
+        <AuthModal
           onClose={() => setShowAuthModal(false)}
           onLoginSuccess={(userData) => setUser(userData)}
         />
       )}
-
       {showAdminModal && (
-        <AdminDashboardModal 
+        <AdminDashboardModal
           onClose={() => setShowAdminModal(false)}
         />
       )}
-
       {showProfileModal && user && (
-        <UserProfileModal 
+        <UserProfileModal
           user={user}
           onClose={() => setShowProfileModal(false)}
           onViewTicket={(b) => setConfirmedBooking(b)}
