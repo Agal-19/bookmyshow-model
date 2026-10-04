@@ -1,0 +1,9 @@
+Django>=4.0
+django-cors-headers
+djangorestframework
+pillow
+qrcode
+reportlab
+stripe
+whitenoise
+gunicorn
