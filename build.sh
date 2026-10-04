@@ -1,14 +1,26 @@
 #!/bin/bash
+echo "Current directory:"
+pwd
+echo "Directory contents:"
+ls -la
+
 echo "Installing frontend dependencies..."
-cd frontend
-npm install
-echo "Building frontend..."
-npm run build
-cd ..
+if [ -d "frontend" ]; then
+  cd frontend
+  npm install
+  echo "Building frontend..."
+  npm run build
+  cd ..
+else
+  echo "frontend directory NOT FOUND!"
+fi
 
 echo "Building backend..."
-cd backend
-# Install python dependencies is handled by Vercel directly if requirements.txt is in root
-python manage.py collectstatic --noinput
-python manage.py migrate
-cd ..
+if [ -d "backend" ]; then
+  cd backend
+  python manage.py collectstatic --noinput
+  python manage.py migrate
+  cd ..
+else
+  echo "backend directory NOT FOUND!"
+fi
